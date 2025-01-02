@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= success ? '¡Éxito!' : 'Error' %></title>
+    <link rel="stylesheet" href="/styles/feedback.css">
+    <style>
+        /* Fondo para éxito */
+body.success-bg {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+/* Fondo para error */
+body.error-bg {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+/* Contenedor central */
+.container {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    width: 90%;
+    max-width: 400px;
+    margin: auto;
+    margin-top: 10%;
+}
+
+/* Iconos */
+.icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.icon.success {
+    color: #2e7d32;
+}
+
+.icon.error {
+    color: #c62828;
+}
+
+/* Títulos */
+h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+/* Párrafos */
+p {
+    font-size: 16px;
+    margin: 10px 0 20px;
+}
+
+/* Botón */
+a {
+    text-decoration: none;
+    color: white;
+    background-color: #2e7d32;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+a.error-bg {
+    background-color: #c62828;
+}
+
+a:hover {
+    background-color: #1b5e20;
+}
+
+a.error-bg:hover {
+    background-color: #b71c1c;
+}
+
+    </style>
+</head>
+<body class="<%= success ? 'success-bg' : 'error-bg' %>">
+    <div class="container">
+        <div class="icon <%= success ? 'success' : 'error' %>">
+            <%= success ? '✔️' : '❌' %>
+        </div>
+        <h1><%= success ? '¡Éxito!' : 'Error' %></h1>
+        <p><%= message %></p>
+        <a href="/">Volver al inicio</a>
+    </div>
+</body>
+</html>

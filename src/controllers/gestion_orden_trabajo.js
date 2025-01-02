@@ -209,71 +209,59 @@ const modificarDatosPersonales = (req, res) => {
    const apellido = req.body.apellido;
    const telefono = req.body.telefono;
 
-   if (usuario == req.session.userName) {
+   if (usuario === req.session.userName) {
       connection.query('SELECT contraseña FROM usuarios WHERE usuario = ?', [usuario], (error, results) => {
          if (error) {
-            console.log(error);
-            res.redirect('/newPassword');
-         } else {
-            if (results.length > 0 && results[0].contraseña == password) {
-               if (userModification == "no" && passwordModification == "no") {
-                  connection.query('UPDATE usuarios SET ? WHERE usuario = ?',
-                     [{ nombre: nombre, apellido: apellido, telefono: telefono }, usuario],
-                     (error, results) => {
-                        if (error) {
-                           console.log(error);
-                        } else {
-                           res.redirect('/newPassword');
-                        }
-                     });
-               } else if (userModification == "yes" && passwordModification == "no") {
-                  connection.query('UPDATE usuarios SET ? WHERE usuario = ?',
-                     [{ nombre: nombre, apellido: apellido, telefono: telefono, usuario: usuarioNuevo }, usuario],
-                     (error, results) => {
-                        if (error) {
-                           console.log(error);
-                        } else {
-                           res.redirect('/cerrarSesion');
-                        }
-                     });
-               } else if (userModification == "no" && passwordModification == "yes") {
-                  if (newPassword == repetirNewPassword) {
-                     connection.query('UPDATE usuarios SET ? WHERE usuario = ?',
-                        [{ nombre: nombre, apellido: apellido, telefono: telefono, contraseña: newPassword }, usuario],
-                        (error, results) => {
-                           if (error) {
-                              console.log(error);
-                           } else {
-                              res.redirect('/cerrarSesion');
-                           }
-                        });
-                  } else {
-                     res.redirect('/newPassword');
-                  }
-               } else if (userModification == "yes" && passwordModification == "yes") {
-                  if (newPassword == repetirNewPassword) {
-                     connection.query('UPDATE usuarios SET ? WHERE usuario = ?',
-                        [{ nombre: nombre, apellido: apellido, telefono: telefono, contraseña: newPassword, usuario: usuarioNuevo }, usuario],
-                        (error, results) => {
-                           if (error) {
-                              console.log(error);
-                           } else {
-                              res.redirect('/cerrarSesion');
-                           }
-                        });
-                  } else {
-                     res.redirect('/newPassword');
-                  }
-               }
-            } else {
-               res.redirect('/newPassword');
+            console.error(error);
+            return res.render('feedback', { message: 'Error interno del servidor', success: false });
+         }
+
+         if (results.length > 0 && results[0].contraseña === password) {
+            const updateData = { nombre, apellido, telefono };
+
+            // Modificar usuario
+            if (userModification === "yes") {
+               updateData.usuario = usuarioNuevo;
             }
+
+            // Modificar contraseña
+            if (passwordModification === "yes") {
+               if (newPassword === repetirNewPassword) {
+                  updateData.contraseña = newPassword;
+               } else {
+                  return res.render('feedback', { message: 'Las contraseñas no coinciden', success: false });
+               }
+            }
+
+            // Actualizar en la base de datos
+            connection.query('UPDATE usuarios SET ? WHERE usuario = ?', [updateData, usuario], (error) => {
+               if (error) {
+                  console.error(error);
+                  return res.render('feedback', { message: 'Error al actualizar los datos', success: false });
+               }
+
+               const message = passwordModification === "yes" || userModification === "yes"
+                  ? 'Datos actualizados con éxito. Inicie sesión nuevamente.'
+                  : 'Datos actualizados con éxito.';
+               const redirect = passwordModification === "yes" || userModification === "yes";
+
+               res.render('feedback', { message, success: true });
+
+               // Redirigir tras mostrar feedback, si es necesario
+               if (redirect) {
+                  setTimeout(() => res.redirect('/cerrarSesion'), 3000); // 3 segundos
+               }
+            });
+         } else {
+            res.render('feedback', { message: 'Usuario o contraseña incorrectos', success: false });
          }
       });
    } else {
-      res.redirect('/newPassword');
+      res.render('feedback', { message: 'Usuario inválido o sesión expirada', success: false });
    }
 };
+
+
 
 
 export default {
