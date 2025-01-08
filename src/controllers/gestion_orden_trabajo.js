@@ -90,7 +90,6 @@ const cambiarEstadoEnProcesoTerminada = (req, res) => {
    const id = req.body.id;
    const tipo = req.body.tipo;
    const descripcionSolucion = req.body.descripcionSolucion;
-   const fechaInicio = req.body.fechaI;
    const lapsoHorasMilisegundos = req.body.horas * 3600000;
    const fechaInicioReal = req.body.inicioReal;
 
@@ -102,21 +101,18 @@ const cambiarEstadoEnProcesoTerminada = (req, res) => {
            const index = match[1];
            const field = match[2];
 
-           // Inicializar el objeto de material si no existe
            if (!materiales[index]) {
                materiales[index] = { id: null, cantidad: 0 };
            }
 
-           // Asignar valor al campo id o cantidad
            if (field === 'id') materiales[index].id = req.body[key];
            if (field === 'cantidad') materiales[index].cantidad = parseInt(req.body[key], 10);
        }
    });
 
-   // Filtrar los materiales con cantidad mayor a cero
    const materialesActualizables = materiales.filter(material => material.cantidad > 0);
 
-   // Actualizar el stock solo para materiales con cantidad mayor a cero
+   // Actualizar stock para materiales utilizados
    materialesActualizables.forEach(({ id, cantidad }) => {
        console.log(`Actualizando stock - Material ID: ${id}, Cantidad: ${cantidad}`);
        connection.query(
@@ -132,7 +128,6 @@ const cambiarEstadoEnProcesoTerminada = (req, res) => {
        );
    });
 
-   // Continuar con la actualización de la orden de trabajo
    const fechaFin = new Date();
    const fechaMomentFin = moment(fechaFin).format('YYYY-MM-DDTHH:mm');
 
@@ -147,7 +142,7 @@ const cambiarEstadoEnProcesoTerminada = (req, res) => {
    if (tipo === "Correctiva") {
        connection.query(
            'UPDATE orden_trabajo SET ? WHERE id_orden_trabajo = ?',
-           [{ estado: "Finalizada", descripcion_solucion: descripcionSolucion, fecha_fin: fechaMomentFin, horas_totales: duracionOT }, id],
+           [{ estado: "Finalizada", fecha_fin: fechaMomentFin, horas_totales: duracionOT }, id],
            (error, results) => {
                if (error) {
                    console.error(error);
@@ -160,23 +155,33 @@ const cambiarEstadoEnProcesoTerminada = (req, res) => {
        const nuevaFechaInicio = new Date(fechaFin.getTime() + lapsoHorasMilisegundos);
        const fechaMomentInicio = moment(nuevaFechaInicio).format("YYYY-MM-DDTHH:mm");
 
+       // Registrar la orden finalizada en ot_programada_finalizada
        connection.query(
            'INSERT INTO ot_programada_finalizada SET ?',
-           { id_orden_programada: id, fecha_inicio: fechaMomentInicio, fecha_inicio_real: fechaInicioReal, fecha_fin: fechaMomentFin, observacion: descripcionSolucion, horas_totales: duracionOT },
+           {
+               id_orden_programada: id,
+               fecha_inicio: fechaInicioReal,
+               fecha_inicio_real: fechaInicioReal,
+               fecha_fin: fechaMomentFin,
+               observacion: descripcionSolucion,
+               horas_totales: duracionOT
+           },
            (error, results) => {
                if (error) {
                    console.error(error);
                    return res.status(500).send("Error al insertar en la tabla ot_programada_finalizada.");
                }
 
+               // Actualizar la misma orden de trabajo a estado "Pendiente" con nueva fecha de inicio
                connection.query(
-                   'DELETE FROM orden_trabajo WHERE id_orden_trabajo = ?',
-                   [id],
+                   'UPDATE orden_trabajo SET ? WHERE id_orden_trabajo = ?',
+                   [{ estado: "Pendiente", fecha_inicio: fechaMomentInicio }, id],
                    (error, results) => {
                        if (error) {
-                           console.error(error);
-                           return res.status(500).send("Error al eliminar la orden de trabajo.");
+                           console.error("Error al actualizar la orden programada:", error);
+                           return res.status(500).send("Error al actualizar la orden programada.");
                        }
+                       console.log("Orden programada actualizada correctamente.");
                        res.redirect('/orden-de-trabajo/en-proceso');
                    }
                );
@@ -184,6 +189,7 @@ const cambiarEstadoEnProcesoTerminada = (req, res) => {
        );
    }
 };
+
 const eliminarOrden = (req, res)=>{
    const id = req.body.id;
    connection.query('DELETE FROM orden_trabajo WHERE id_orden_trabajo = ?', [id], (error, results)=>{
