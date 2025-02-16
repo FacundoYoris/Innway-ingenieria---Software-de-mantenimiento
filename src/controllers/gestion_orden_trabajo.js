@@ -92,7 +92,11 @@ const cambiarEstadoEnProcesoTerminada = (req, res) => {
    const descripcionSolucion = req.body.descripcionSolucion;
    const lapsoHorasMilisegundos = req.body.horas * 3600000;
    const fechaInicioReal = req.body.inicioReal;
+   
+   // ESTO HAY QUE BORRAR UNA VEZ QUE IVAN TERMINA CON LAS PRUEBAS Y DESCOMENTAR LAS LINEAS 134 y 135 Y borrar la 136
+   const fechaFin = new Date(req.body.fechaFin);
 
+   
    // Construir array de materiales procesando las propiedades del objeto `req.body`
    let materiales = [];
    Object.keys(req.body).forEach(key => {
@@ -128,7 +132,8 @@ const cambiarEstadoEnProcesoTerminada = (req, res) => {
        );
    });
 
-   const fechaFin = new Date();
+   // const fechaFin = new Date();
+   // const fechaMomentFin = moment(fechaFin).format('YYYY-MM-DDTHH:mm');
    const fechaMomentFin = moment(fechaFin).format('YYYY-MM-DDTHH:mm');
 
    const year = fechaInicioReal.substring(0, 4);
