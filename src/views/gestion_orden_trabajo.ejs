@@ -90,70 +90,114 @@
     </main>                      
     
 <!-- MODAL CREAR ORDEN -->
-<div class="modal fade" id="crearOrden" tabindex="-1" data-bs-keyboard="false" data-bs-backdrop="static" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- MODAL CREAR ORDEN -->
+<div class="modal fade" id="crearOrden" tabindex="-1" data-bs-keyboard="false" data-bs-backdrop="static" aria-labelledby="crearOrdenLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content shadow rounded-4 border-0">
+
+      <!-- Encabezado -->
+      <div class="modal-header bg-primary text-white rounded-top-4">
+        <h5 class="modal-title w-100 text-center fw-bold">Nueva Orden de Trabajo</h5>
+        <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      <div class="modal-footer">
-          <div class="container mt-10">     
-              <div class="card border-secondary">  
-                  <div class="card-header bg-primary text-white">Nueva orden de trabajo</div>
-                  <div class="card-body">
-                      <form action="/save" method="POST">
-                          <div class="mb-3">
-                            <label for="user" class="form-label">Tipo</label>
-                            <select id="select" name="select" class="form-select" aria-label="Default select example" tabindex="2">
-                              <option value="">Seleccionar tipo</option>
-                              <option value="Correctiva" >Correctiva</option>
-                              <option value="Programada">Programada</option>
-                            </select>
-                              <label for="user" class="form-label mt-2" id="intervaloPeriodica">Repetir cada (cantidad de horas) </label>
-                              <input type="text" class="form-control"  id="lapsoPeriodica" name="lapsoPeriodica" tabindex="1" value="0">
-                          <label for="user" class="form-label mt-2">Tarea</label>
-                          <textarea class="form-control" id="tarea" name="tarea" tabindex="1" style="height: 80px; resize: none;" required></textarea>
-                          <label for="user" class="form-label mt-2">Fecha inicio</label>
-                          <input type="datetime-local" class="form-control" id="fecha" name="fecha" tabindex="1" required>
-                          <label for="user" class="form-label mt-2">Activo</label>
-                          <select id="activo" name="activo" class="form-select" tabindex="1">
-                            <option value="">Seleccionar activo</option>
-                            <% activos.forEach(activo => { %>
-                                <option value="<%= activo.nombre %>"><%= activo.nombre %></option>
-                            <% }); %>
-                          </select>
-                          <label for="user" class="form-label mt-2">Elemento involucrado</label>
-                          <input type="text" class="form-control" id="elemento" name="elemento" tabindex="1">
-                          <label for="user" class="form-label mt-2">Responsable</label>
-                          <select id="Responsable" name="Responsable" class="form-select" tabindex="1">
-                            <option value="">Seleccionar responsable</option>
-                            <% usuarios.forEach(usuario => { %>
-                                <option value="<%= usuario.usuario %>"><%= usuario.usuario %></option>
-                            <% }); %>
-                          </select>
-                          <label for="user" class="form-label mt-2">Prioridad</label>
-                          <select id="Prioridad" name="Prioridad" class="form-select" aria-label="Default select example" tabindex="2">
-                              <option value="Alta" selected>Alta</option>
-                              <option value="Media">Media</option>
-                              <option value="Baja">Baja</option>
-                          </select>
-                          <label for="user" class="form-label mt-2">Descripción del problema</label>
-                          <textarea class="form-control" id="descripción" name="descripcion" tabindex="1" style="height: 80px; resize: none;" required></textarea>
-                          </div>   
-                          <div class="mb-3">
-                          
-                          </div>        
-                          <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button> -->
-                          <a href="/orden-de-trabajo/generar-orden" class="btn btn-secondary">Cancelar</a> 
-                          <button type="submit" class="btn btn-primary" tabindex="5">Guardar</button>
-                      </form>
-                  </div>
-              </div>        
-        </div>
+
+      <!-- Cuerpo -->
+      <div class="modal-body px-4 py-3">
+        <form action="/save" method="POST" class="needs-validation" novalidate>
+          <div class="row g-3">
+
+            <!-- Tipo y Repetir -->
+            <div class="col-md-6">
+              <label for="select" class="form-label fw-semibold">Tipo</label>
+              <select id="select" name="select" class="form-select" required>
+                <option value="">Seleccionar tipo</option>
+                <option value="Correctiva">Correctiva</option>
+                <option value="Programada">Programada</option>
+              </select>
+            </div>
+
+            <div class="col-md-6" id="intPeriodica">
+              <label for="lapsoPeriodica" class="form-label fw-semibold" id="intervaloPeriodica">Repetir cada (horas)</label>
+              <input type="text" class="form-control" id="lapsoPeriodica" name="lapsoPeriodica" value="0">
+            </div>
+
+            <!-- Checkbox producción -->
+            <div class="col-12">
+              <div class="form-check mt-1">
+                <input class="form-check-input" type="checkbox" id="produccion" name="produccion">
+                <label class="form-check-label fw-semibold" for="produccion">
+                  ¿Es una tarea de producción?
+                </label>
+              </div>
+            </div>
+
+            <!-- Tarea y Elemento involucrado (misma altura y estilo) -->
+<div class="col-md-6">
+  <label for="tarea" class="form-label fw-semibold">Tarea</label>
+  <textarea class="form-control" id="tarea" name="tarea" style="min-height: 70px; resize: vertical;" required></textarea>
+</div>
+
+<div class="col-md-6" id="grupoElemento">
+  <label for="elemento" class="form-label fw-semibold">Elemento involucrado</label>
+  <textarea class="form-control" id="elemento" name="elemento" style="min-height: 70px; resize: vertical;"></textarea>
+</div>
+
+
+            <!-- Fecha y Activo -->
+            <div class="col-md-6">
+              <label for="fecha" class="form-label fw-semibold">Fecha inicio</label>
+              <input type="datetime-local" class="form-control" id="fecha" name="fecha" required>
+            </div>
+
+            <div class="col-md-6">
+              <label for="activo" class="form-label fw-semibold">Activo</label>
+              <select id="activo" name="activo" class="form-select" required>
+                <option value="">Seleccionar activo</option>
+                <% activos.forEach(activo => { %>
+                  <option value="<%= activo.nombre %>"><%= activo.nombre %></option>
+                <% }); %>
+              </select>
+            </div>
+
+            <!-- Responsable y Prioridad -->
+            <div class="col-md-6">
+              <label for="Responsable" class="form-label fw-semibold">Responsable</label>
+              <select id="Responsable" name="Responsable" class="form-select" required>
+                <option value="">Seleccionar responsable</option>
+                <% usuarios.forEach(usuario => { %>
+                  <option value="<%= usuario.usuario %>"><%= usuario.usuario %></option>
+                <% }); %>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="Prioridad" class="form-label fw-semibold">Prioridad</label>
+              <select id="Prioridad" name="Prioridad" class="form-select">
+                <option value="Alta" selected>Alta</option>
+                <option value="Media">Media</option>
+                <option value="Baja">Baja</option>
+              </select>
+            </div>
+
+            <!-- Descripción -->
+           <div class="col-12" id="grupoDescripcion">
+  <label for="descripcion" class="form-label fw-semibold">Descripción del problema</label>
+  <textarea class="form-control" id="descripcion" name="descripcion" style="height: 70px; resize: vertical;" required></textarea>
+</div>
+
+          </div>
+
+          <!-- Botones -->
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <a href="/orden-de-trabajo/generar-orden" class="btn btn-secondary px-4">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-4">Guardar</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </div>
+
 <!-- -------------------------------------------------------------------------- -->
           
     
