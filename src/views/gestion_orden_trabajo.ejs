@@ -1,44 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">    
-    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
-    <link href="https://cdn.datatables.net/fixedheader/3.1.6/css/fixedHeader.dataTables.min.css">
-    <!-- BOOTSTRAP -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
-    
-    <%- include('partes/header.ejs') %>
-    
-<style>
 
-#intervaloPeriodica, #lapsoPeriodica{
-   display: none;
-}
-#formVer{
-  width: 2rem;
-}
-</style>
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+  <link href="https://cdn.datatables.net/fixedheader/3.1.6/css/fixedHeader.dataTables.min.css">
+  <!-- BOOTSTRAP -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
+
+  <%- include('partes/header.ejs') %>
+
+    <style>
+      #intervaloPeriodica,
+      #lapsoPeriodica, #unidadperiodica {
+        display: none;
+      }
+
+      #formVer {
+        width: 2rem;
+      }
+    </style>
     <title>GESTIÓN DE ORDENES DE TRABAJO</title>
-    
+
 </head>
+
 <body>
   <div id="menu">
-  <%- include('partes/navegacion.ejs') %>
+    <%- include('partes/navegacion.ejs') %>
   </div>
-      <main>
-        <div id="titulo-container">
-          <div id="titulo">ORDENES DE TRABAJO</div>
-        </div>
-      <div  eblclass="container">    
+  <main>
+    <div id="titulo-container">
+      <div id="titulo">ORDENES DE TRABAJO</div>
+    </div>
+    <div eblclass="container">
 
-        <!-- Boton crear orden -->
-                <button type="button" class="btn btn-outline-primary mt-4" data-bs-toggle="modal" data-bs-target="#crearOrden">
-          <i class='bx bxs-plus-circle bx-md'></i>
-        </button>
+      <!-- Boton crear orden -->
+      <button type="button" class="btn btn-outline-primary mt-4" data-bs-toggle="modal" data-bs-target="#crearOrden">
+        <i class='bx bxs-plus-circle bx-md'></i>
+      </button>
 
       <table class="table table-bordered table-striped text-center mt-4 display" id="tabla">
         <thead>
@@ -56,99 +60,151 @@
         </thead>
         <tbody>
           <!-- //Los results que yo paso en el index.js, acá los uso con la variable orden declarada dentro del forEach-->
-          <% results.forEach((orden)=>{ %>             
-            <tr >  
-                <td class="p-1 col-id"><%= orden.id_orden_trabajo %></td>  
-                <td class="p-1"><%= orden.actividad %></td>
-                <td class="p-1"><%= orden.estado %></td>
-                <td class="p-1"><%= orden.prioridad %></td>
-                <td class="p-1"><%= orden.responsable%></td>
-                <td class="p-1"><%= orden.fecha_inicio %></td>
-                <td class="p-1"><%= orden.activo %></td>
-                <td class="p-1 col-acciones">
-                  <!-- Boton ver orden -->
-                  <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#verOrden<%= orden.id_orden_trabajo %>">
-                    <i class='bx bx-show bx-sm'></i>
-                  </button>
-                  <!-- Boton editar orden -->  
-                   <button type="button" class="btn btn-outline-info"  data-bs-toggle="modal" data-bs-target="#editarOrden<%= orden.id_orden_trabajo %>">
-                    <i class='bx bx-edit-alt bx-sm'></i>
-                  </button>
-                  <!-- Boton eliminar orden -->  
-                  <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#eliminarOrden<%= orden.id_orden_trabajo %>">
-                    <i class='bx bx-trash bx-sm bx-flip-horizontal' style='color:#0f1010' ></i>
-                  </button>
-                </td>
+          <% results.forEach((orden)=>{ %>
+            <tr>
+              <td class="p-1 col-id">
+                <%= orden.id_orden_trabajo %>
+              </td>
+              <td class="p-1">
+                <%= orden.actividad %>
+              </td>
+              <td class="p-1">
+                <%= orden.estado %>
+              </td>
+              <td class="p-1">
+                <%= orden.prioridad %>
+              </td>
+              <td class="p-1">
+                <%= orden.responsable%>
+              </td>
+              <td class="p-1">
+                <%= orden.fecha_inicio %>
+              </td>
+              <td class="p-1">
+                <%= orden.activo %>
+              </td>
+              <td class="p-1 col-acciones">
+  <div class="dropdown">
+    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="accionesDropdown<%= orden.id_orden_trabajo %>" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class='bx bx-dots-vertical-rounded bx-sm'></i>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="accionesDropdown<%= orden.id_orden_trabajo %>">
+      <li>
+        <button class="dropdown-item text-primary" data-bs-toggle="modal" data-bs-target="#verOrden<%= orden.id_orden_trabajo %>">
+          <i class='bx bx-show'></i> Ver
+        </button>
+      </li>
+      <li>
+        <button class="dropdown-item text-info" data-bs-toggle="modal" data-bs-target="#editarOrden<%= orden.id_orden_trabajo %>">
+          <i class='bx bx-edit-alt'></i> Editar
+        </button>
+      </li>
+      <li>
+        <button class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#eliminarOrden<%= orden.id_orden_trabajo %>">
+          <i class='bx bx-trash bx-flip-horizontal'></i> Eliminar
+        </button>
+      </li>
+    </ul>
+  </div>
+</td>
+
             </tr>
-            <%- include('partes/modalEditarOrden.ejs',{"id":orden.id_orden_trabajo, "datos":orden}) %>
-            <%- include('partes/modalEliminarOrden.ejs',{"id":orden.id_orden_trabajo}) %> 
-            <%- include('partes/modalVerOrden.ejs',{"id":orden.id_orden_trabajo, "datos":orden}) %>                         
-         <% }) %>
-          </tbody>
+            <%- include('partes/modalEditarOrden.ejs',{"id":orden.id_orden_trabajo, "datos" :orden}) %>
+              <%- include('partes/modalEliminarOrden.ejs',{"id":orden.id_orden_trabajo}) %>
+                <%- include('partes/modalVerOrden.ejs',{"id":orden.id_orden_trabajo, "datos" :orden}) %>
+                  <% }) %>
+        </tbody>
       </table>
-      </div>
-    </main>                      
-    
-<!-- MODAL CREAR ORDEN -->
-<!-- MODAL CREAR ORDEN -->
+    </div>
+  </main>
+
+  
+ <!-- MODAL CREAR ORDEN -->
 <div class="modal fade" id="crearOrden" tabindex="-1" data-bs-keyboard="false" data-bs-backdrop="static" aria-labelledby="crearOrdenLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content shadow rounded-4 border-0">
-
+      
       <!-- Encabezado -->
       <div class="modal-header bg-primary text-white rounded-top-4">
         <h5 class="modal-title w-100 text-center fw-bold">Nueva Orden de Trabajo</h5>
         <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-
+      
       <!-- Cuerpo -->
       <div class="modal-body px-4 py-3">
         <form action="/save" method="POST" class="needs-validation" novalidate>
-          <div class="row g-3">
-
-            <!-- Tipo y Repetir -->
+          
+          <!-- FILA 1: Tipo de tarea / Repetir cada -->
+          <div class="row g-3 mb-3">
+            <!-- Columna 1: Tipo de tarea -->
             <div class="col-md-6">
-              <label for="select" class="form-label fw-semibold">Tipo</label>
+              <label for="select" class="form-label fw-semibold">Tipo de tarea</label>
               <select id="select" name="select" class="form-select" required>
                 <option value="">Seleccionar tipo</option>
                 <option value="Correctiva">Correctiva</option>
                 <option value="Programada">Programada</option>
               </select>
             </div>
-
+            <!-- Columna 2: Repetir cada -->
             <div class="col-md-6" id="intPeriodica">
-              <label for="lapsoPeriodica" class="form-label fw-semibold" id="intervaloPeriodica">Repetir cada (horas)</label>
+              <label for="lapsoPeriodica" class="form-label fw-semibold" id="intervaloPeriodica">Repetir cada</label>
               <input type="text" class="form-control" id="lapsoPeriodica" name="lapsoPeriodica" value="0">
             </div>
-
-            <!-- Checkbox producción -->
-            <div class="col-12">
-              <div class="form-check mt-1">
+          </div>
+          
+          
+          <!-- FILA 2: Tarea de producción (checkbox) / Unidad de tiempo (radio buttons) -->
+          <div class="row g-3 mb-3">
+            <!-- Columna 1: Checkbox de Tarea de producción -->
+            <div class="col-md-6">
+              <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="produccion" name="produccion">
-                <label class="form-check-label fw-semibold" for="produccion">
-                  ¿Es una tarea de producción?
-                </label>
+                <label class="form-check-label fw-semibold" for="produccion">Tarea de producción</label>
               </div>
             </div>
-
-            <!-- Tarea y Elemento involucrado (misma altura y estilo) -->
-<div class="col-md-6">
-  <label for="tarea" class="form-label fw-semibold">Tarea</label>
-  <textarea class="form-control" id="tarea" name="tarea" style="min-height: 70px; resize: vertical;" required></textarea>
-</div>
-
-<div class="col-md-6" id="grupoElemento">
-  <label for="elemento" class="form-label fw-semibold">Elemento involucrado</label>
-  <textarea class="form-control" id="elemento" name="elemento" style="min-height: 70px; resize: vertical;"></textarea>
-</div>
-
-
-            <!-- Fecha y Activo -->
+            <!-- Columna 2: Unidad de tiempo -->
+            <div class="col-md-6" id="unidadperiodica">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="unidadTiempo" id="horas" value="horas">
+                <label class="form-check-label" for="horas">Horas</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="unidadTiempo" id="dias" value="dias">
+                <label class="form-check-label" for="dias">Días</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="unidadTiempo" id="semanas" value="semanas">
+                <label class="form-check-label" for="semanas">Semanas</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="unidadTiempo" id="anios" value="anios">
+                <label class="form-check-label" for="anios">Años</label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- FILA 3: Tarea / Elemento involucrado -->
+          <div class="row g-3 mb-3">
+            <!-- Columna 1: Tarea -->
+            <div class="col-md-6">
+              <label for="tarea" class="form-label fw-semibold">Tarea</label>
+              <textarea class="form-control" id="tarea" name="tarea" style="min-height: 70px; resize: vertical;" required></textarea>
+            </div>
+            <!-- Columna 2: Elemento involucrado -->
+            <div class="col-md-6" id="grupoElemento">
+              <label for="elemento" class="form-label fw-semibold">Elemento involucrado</label>
+              <textarea class="form-control" id="elemento" name="elemento" style="min-height: 70px; resize: vertical;"></textarea>
+            </div>
+          </div>
+          
+          <!-- FILA 4: Fecha inicio / Activo -->
+          <div class="row g-3 mb-3">
+            <!-- Columna 1: Fecha inicio -->
             <div class="col-md-6">
               <label for="fecha" class="form-label fw-semibold">Fecha inicio</label>
               <input type="datetime-local" class="form-control" id="fecha" name="fecha" required>
             </div>
-
+            <!-- Columna 2: Activo -->
             <div class="col-md-6">
               <label for="activo" class="form-label fw-semibold">Activo</label>
               <select id="activo" name="activo" class="form-select" required>
@@ -158,62 +214,84 @@
                 <% }); %>
               </select>
             </div>
+          </div>
+          
+          <!-- FILA 5: Responsable / Prioridad / Tipo de intervención -->
+<div class="row g-3 mb-3">
+  <!-- Responsable -->
+  <div class="col-md-4">
+    <label for="Responsable" class="form-label fw-semibold">Responsable</label>
+    <select id="Responsable" name="Responsable" class="form-select" required>
+      <option value="">Seleccionar responsable</option>
+      <% usuarios.forEach(usuario => { %>
+        <option value="<%= usuario.usuario %>"><%= usuario.usuario %></option>
+      <% }); %>
+    </select>
+  </div>
 
-            <!-- Responsable y Prioridad -->
-            <div class="col-md-6">
-              <label for="Responsable" class="form-label fw-semibold">Responsable</label>
-              <select id="Responsable" name="Responsable" class="form-select" required>
-                <option value="">Seleccionar responsable</option>
-                <% usuarios.forEach(usuario => { %>
-                  <option value="<%= usuario.usuario %>"><%= usuario.usuario %></option>
-                <% }); %>
-              </select>
-            </div>
+  <!-- Prioridad -->
+  <div class="col-md-4">
+    <label for="Prioridad" class="form-label fw-semibold">Prioridad</label>
+    <select id="Prioridad" name="Prioridad" class="form-select">
+      <option value="Alta" selected>Alta</option>
+      <option value="Media">Media</option>
+      <option value="Baja">Baja</option>
+    </select>
+  </div>
 
-            <div class="col-md-6">
-              <label for="Prioridad" class="form-label fw-semibold">Prioridad</label>
-              <select id="Prioridad" name="Prioridad" class="form-select">
-                <option value="Alta" selected>Alta</option>
-                <option value="Media">Media</option>
-                <option value="Baja">Baja</option>
-              </select>
-            </div>
-
-            <!-- Descripción -->
-           <div class="col-12" id="grupoDescripcion">
-  <label for="descripcion" class="form-label fw-semibold">Descripción del problema</label>
-  <textarea class="form-control" id="descripcion" name="descripcion" style="height: 70px; resize: vertical;" required></textarea>
+  <!-- Tipo de intervención -->
+  <div class="col-md-4">
+    <label for="tipoIntervencion" class="form-label fw-semibold">Tipo de intervención</label>
+    <select id="tipoIntervencion" name="tipoIntervencion" class="form-select" required>
+      <option value="">Seleccionar tipo</option>
+      <option value="Inspección visual/medición">Inspección visual/medición</option>
+      <option value="Recambio">Recambio</option>
+      <option value="Calibración">Calibración</option>
+    </select>
+  </div>
 </div>
 
+          
+          <!-- FILA 6: Descripción del problema (fila completa) -->
+          <div class="row g-3 mb-3">
+            <div class="col-12" id="grupoDescripcion">
+              <label for="descripcion" class="form-label fw-semibold">Descripción del problema</label>
+              <textarea class="form-control" id="descripcion" name="descripcion" style="height: 70px; resize: vertical;" required></textarea>
+            </div>
           </div>
-
+          
           <!-- Botones -->
           <div class="d-flex justify-content-end gap-2 mt-4">
             <a href="/orden-de-trabajo/generar-orden" class="btn btn-secondary px-4">Cancelar</a>
             <button type="submit" class="btn btn-primary px-4">Guardar</button>
           </div>
+          
         </form>
       </div>
     </div>
   </div>
 </div>
 
-<!-- -------------------------------------------------------------------------- -->
-          
-    
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>    
-<!-- JQUERY -->
-<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
-<!-- DATATABLES -->
-<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/fixedheader/3.1.6/js/dataTables.fixedHeader.min.js"></script> 
-<!-- BOOTSTRAP -->
-<script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-<script src="/buscarFiltrarTabla.js"></script>
-<script src="/ocultarIntervalo.js"></script>
-<script src="/actualizarPagina.js"></script>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+    crossorigin="anonymous"></script>
+  <!-- JQUERY -->
+  <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+    crossorigin="anonymous"></script>
+  <!-- DATATABLES -->
+  <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/fixedheader/3.1.6/js/dataTables.fixedHeader.min.js"></script>
+  <!-- BOOTSTRAP -->
+  <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script src="/buscarFiltrarTabla.js"></script>
+  <script src="/ocultarIntervalo.js"></script>
+  <script src="/actualizarPagina.js"></script>
 
 
 </body>
+
 </html>

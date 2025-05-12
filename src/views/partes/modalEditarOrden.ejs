@@ -1,96 +1,119 @@
-<!-- Cartel para editar orden -->
-<div class="modal fade" id="editarOrden<%=id%>"  tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- MODAL EDITAR ORDEN -->
+<div class="modal fade" id="editarOrden<%= id %>" tabindex="-1" aria-labelledby="editarOrdenLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content shadow rounded-4 border-0">
+
+      <!-- Encabezado -->
+      <div class="modal-header bg-primary text-white rounded-top-4">
+        <h5 class="modal-title w-100 text-center fw-bold">
+          Editar Orden de Trabajo N° <%= datos.id_orden_trabajo %>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      <div class="modal-footer">
-          <div class="container mt-10">     
-              <div class="card border-secondary">  
-                  <div class="card-header bg-primary text-white">Editar orden de trabajo número:<strong class="p1"> <%= datos.id_orden_trabajo%></strong></div>
-                  <div class="card-body">
-                      <form action="/update" method="POST">
-                        <input id="id" name="id" value="<%= datos.id_orden_trabajo%>" hidden>
-                          <div class="mb-3">
-                          <label for="user" class="form-label">Tipo</label>
-                              <select id="select" name="select" class="form-select" aria-label="Default select example" tabindex="2" >
-                                <option <%= datos.tipo == ' ' ? "selected" : '' %> value="">Seleccionar tipo</option>
-                                <option <%= datos.tipo == 'Correctiva' ? "selected" : '' %> value="Correctiva">Correctiva</option>
-                                <option <%= datos.tipo == 'Programada' ? "selected" : '' %> value="Programada">Programada</option>                    
-                              </select>
-                          <label for="user" class="form-label mt-2" id="intPeriodica">Repetir cada (cantidad de horas) </label>
-                          <input type="text" class="form-control"  id="lapPeriodica" name="lapPeriodica" tabindex="1" value="<%= datos.lapsoProgramada%>">
-                          <label for="user" class="form-label">Estado</label>
-                              <select id="estado" name="estado" class="form-select" aria-label="Default select example" tabindex="2" >
-                                <option <%= datos.estado == 'Pendiente' ? "selected" : '' %> value="Pendiente">Pendiente</option>
-                                <option <%= datos.estado == 'En proceso' ? "selected" : '' %> value="En proceso">En proceso</option>
-                                <option <%= datos.estado == 'Finalizada' ? "selected" : '' %> value="Finalizada">
-                                  
-                                  
-                                  Finalizada
-                                </option>                    
-                              </select>
-                          <label for="user" class="form-label mt-2">Tarea</label>
-                          <textarea class="form-control" id="tarea" name="tarea" tabindex="1" style="height: 80px; resize: none;"><%= datos.actividad%></textarea>
 
-                          <label for="user" class="form-label mt-2">Fecha inicio</label>
-                          <input type="datetime-local" class="form-control" id="fecha" name="fecha" tabindex="1" value="<%= datos.fecha_inicio %>">
+      <!-- Cuerpo -->
+      <div class="modal-body px-4 py-3">
+        <form action="/update" method="POST">
+          <input type="hidden" name="id" value="<%= datos.id_orden_trabajo %>">
 
+          <!-- Fila 1: Tipo / Estado / Lapso -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Tipo</label>
+              <select name="select" class="form-select">
+                <option value="">Seleccionar tipo</option>
+                <option value="Correctiva" <%= datos.tipo == 'Correctiva' ? 'selected' : '' %>>Correctiva</option>
+                <option value="Programada" <%= datos.tipo == 'Programada' ? 'selected' : '' %>>Programada</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Estado</label>
+              <select name="estado" class="form-select">
+                <option value="Pendiente" <%= datos.estado == 'Pendiente' ? 'selected' : '' %>>Pendiente</option>
+                <option value="En proceso" <%= datos.estado == 'En proceso' ? 'selected' : '' %>>En proceso</option>
+                <option value="Finalizada" <%= datos.estado == 'Finalizada' ? 'selected' : '' %>>Finalizada</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Repetir cada (horas)</label>
+              <input type="text" name="lapPeriodica" class="form-control" value="<%= datos.lapsoProgramada %>">
+            </div>
+          </div>
 
-                          <label for="user" class="form-label mt-2">Activo</label>
+          <!-- Fila 2: Fecha / Activo -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Fecha inicio</label>
+              <input type="datetime-local" name="fecha" class="form-control" value="<%= datos.fecha_inicio %>">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Activo</label>
+              <select name="activo" class="form-select">
+                <option value="">Seleccionar activo</option>
+                <% activos.forEach(activo => { %>
+                  <option value="<%= activo.nombre %>" <%= datos.activo == activo.nombre ? "selected" : '' %>>
+                    <%= activo.nombre %>
+                  </option>
+                <% }); %>
+              </select>
+            </div>
+          </div>
 
-                          <select id="activo" name="activo" class="form-select" tabindex="1">
-                            <option value="">Seleccionar activo</option>
-                            <% activos.forEach(activo => { %>
-                              <option  <%= datos.activo == activo.nombre ? "selected" : '' %>
-                                value="<%= activo.nombre %>" >
-                                <%= activo.nombre %>      
-                              </option>
-                            <% }); %>
-                          </select>
-                          <label for="user" class="form-label mt-2">Elemento</label>
-                          <input type="text" class="form-control" id="elemento" name="elemento" tabindex="1" value="<%= datos.elemento %>">
-                          <!-- <label for="user" class="form-label mt-2">Responsable</label>
-                          <input type="text" class="form-control" id="Responsable" name="Responsable" tabindex="1" value="<%= datos.responsable %>">  -->
-                          <label for="user" class="form-label mt-2">Responsable</label>
+          <!-- Fila 3: Tarea / Elemento -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Tarea</label>
+              <textarea name="tarea" class="form-control" rows="2"><%= datos.actividad %></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Elemento</label>
+              <input type="text" name="elemento" class="form-control" value="<%= datos.elemento %>">
+            </div>
+          </div>
 
-                          <select id="Responsable" name="Responsable" class="form-select" tabindex="1">
-                            <option value="">Seleccionar responsable</option>
-                            <% usuarios.forEach(usuario => { %>
-                              <option  <%= datos.responsable == usuario.usuario ? "selected" : '' %>
-                                value="<%= usuario.usuario %>" >
-                                <%= usuario.usuario %>      
-                              </option>
-                            <% }); %>
-                          </select>
+          <!-- Fila 4: Responsable / Prioridad -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Responsable</label>
+              <select name="Responsable" class="form-select">
+                <option value="">Seleccionar responsable</option>
+                <% usuarios.forEach(usuario => { %>
+                  <option value="<%= usuario.usuario %>" <%= datos.responsable == usuario.usuario ? "selected" : '' %>>
+                    <%= usuario.usuario %>
+                  </option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Prioridad</label>
+              <select name="Prioridad" class="form-select">
+                <option value="Alta" <%= datos.prioridad == 'Alta' ? "selected" : '' %>>Alta</option>
+                <option value="Media" <%= datos.prioridad == 'Media' ? "selected" : '' %>>Media</option>
+                <option value="Baja" <%= datos.prioridad == 'Baja' ? "selected" : '' %>>Baja</option>
+              </select>
+            </div>
+          </div>
 
-                          <label for="user" class="form-label mt-2">Prioridad</label>
-                          <select id="Prioridad" name="Prioridad" class="form-select" aria-label="Default select example" tabindex="2">
-                            <option <%= datos.prioridad == 'Alta' ? "selected" : '' %> value="Alta">Alta</option>
-                            <option <%= datos.prioridad == 'Media' ? "selected" : '' %> value="Media">Media</option>
-                            <option <%= datos.prioridad == 'Baja' ? "selected" : '' %> value="Baja">Baja</option>
-                          </select>
-                          <label for="user" class="form-label mt-2">Descripción del problema</label>
-                          <textarea class="form-control" id="descripción" name="descripcion" tabindex="1" style="height: 80px; resize: none;"><%= datos.descripción_problematica %></textarea>
-                          <% if(datos.estado == "Finalizada") {%>
-                            <label for="user" class="form-label mt-2">Solución</label>
-                          <textarea class="form-control" id="descripcionSolucion" name="descripcionSolucion" tabindex="1" style="height: 80px; resize: none;"><%= datos.descripcion_solucion %></textarea>
-                          <% }%>
-                          </div>   
-                          <div class="mb-3">
-                          
-                          </div>        
-                          <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >Cancelar</button> -->
-                          <a href="/orden-de-trabajo/generar-orden" class="btn btn-secondary">Cancelar</a> 
-                          <button type="submit" class="btn btn-primary" tabindex="5">Guardar</button>
-                          <!-- <button type="submit" class="btn btn-primary" tabindex="5">Guardar</button>
-                          <a href="/orden-de-trabajo/generar-orden" class="btn btn-secondary">Cancelar</a> -->
-                      
-                      </form>
-                  </div>
-              </div>        
-        </div>
+          <!-- Fila 5: Descripción y Solución -->
+          <div class="row g-3 mb-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Descripción del problema</label>
+              <textarea name="descripcion" class="form-control" rows="2"><%= datos.descripción_problematica %></textarea>
+            </div>
+            <% if (datos.estado === "Finalizada") { %>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Solución</label>
+                <textarea name="descripcionSolucion" class="form-control" rows="2"><%= datos.descripcion_solucion %></textarea>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Botones -->
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <a href="/orden-de-trabajo/generar-orden" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

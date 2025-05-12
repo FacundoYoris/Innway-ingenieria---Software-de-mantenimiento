@@ -61,8 +61,21 @@
                   <% } %>
                 </div>
 
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <input type="submit" class="btn btn-primary" tabindex="5" value="Finalizar tarea">
+                <!-- Campo alineado: ¿El activo queda disponible? -->
+<div class="row mb-3 align-items-center">
+  <div class="col-md-8">
+    <label for="activoDisponible<%= id %>" class="form-label fw-semibold">¿El activo queda disponible?</label>
+  </div>
+  <div class="col-md-2">
+    <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" id="activoDisponible<%= id %>" name="activoDisponible">
+    </div>
+  </div>
+</div>
+
+<!-- Botones -->
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+<input type="submit" class="btn btn-primary" tabindex="5" value="Finalizar tarea">
               </form>
             </div>
           </div>

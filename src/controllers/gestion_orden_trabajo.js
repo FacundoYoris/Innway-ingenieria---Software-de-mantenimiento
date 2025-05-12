@@ -3,35 +3,44 @@ import connection from "../database/db.js";
 import express from 'express';
 
 const save = (req, res) => {
-   const tipo = req.body.select;
-   const tarea = req.body.tarea; //Esto es "actividad" en la BDD
-   const fecha = req.body.fecha;
-   const activo = req.body.activo;
-   const Responsable = req.body.Responsable;
-   const Prioridad = req.body.Prioridad;
-   const descripcion = req.body.descripcion;
-   const lapso = req.body.lapsoPeriodica;
-   const elemento = req.body.elemento;
-   
-   connection.query('INSERT INTO orden_trabajo SET ?', {
-     tipo: tipo,
-     actividad: tarea,
-     fecha_inicio: fecha,
-     activo: activo,
-     responsable: Responsable,
-     prioridad: Prioridad,
-     lapsoProgramada: lapso,
-     usuario_creador: req.session.userName,
-     descripción_problematica: descripcion,
-     elemento: elemento,
-   }, (error, results) => {
-     if (error) {
-       console.log(error);
-     } else {
-       res.redirect('/orden-de-trabajo/generar-orden');
-     }
-   });
- };
+  const tipo = req.body.select;
+  const tarea = req.body.tarea;
+  const fecha = req.body.fecha;
+  const activo = req.body.activo;
+  const Responsable = req.body.Responsable;
+  const Prioridad = req.body.Prioridad;
+  const descripcion = req.body.descripcion;
+  const lapso = req.body.lapsoPeriodica;
+  const elemento = req.body.elemento;
+
+  // Nuevos campos
+  const produccion = req.body.produccion === 'on' ? 1 : 0;
+  const unidad = req.body.unidadTiempo;
+  const intervencion = req.body.tipoIntervencion;
+
+  connection.query('INSERT INTO orden_trabajo SET ?', {
+    tipo: tipo,
+    actividad: tarea,
+    fecha_inicio: fecha,
+    activo: activo,
+    responsable: Responsable,
+    prioridad: Prioridad,
+    lapsoProgramada: lapso,
+    usuario_creador: req.session.userName,
+    descripción_problematica: descripcion,
+    elemento: elemento,
+    tarea_produccion: produccion,
+    unidad: unidad,
+    intervencion: intervencion,
+  }, (error, results) => {
+    if (error) {
+      console.log(error);
+    } else {
+      res.redirect('/orden-de-trabajo/generar-orden');
+    }
+  });
+};
+
 
 const update = (req, res)=>{
    const id = req.body.id;
@@ -68,74 +77,75 @@ const update = (req, res)=>{
    })
 };
 
-const cambiarEstadoPendienteEnProceso = (req, res)=>{
-   const id = req.body.id;
-
-   const fechaInicioReal = new Date(); //Este formato tira tres horas adelantado por la zona horaria.
-   var fechaMoment = moment(fechaInicioReal,'YYYY-MM-DD HH:mm:ss.SSS').format('YYYY-MM-DDTHH:mm');
+const cambiarEstadoPendienteEnProceso = (req, res) => {
+   const idOrden = req.body.id;
+   const inhabilitarActivo = req.body.inhabilitarActivo === 'on';
+ 
+   const fechaInicioReal = new Date();
+   const fechaMoment = moment(fechaInicioReal, 'YYYY-MM-DD HH:mm:ss.SSS').format('YYYY-MM-DDTHH:mm');
    console.log(fechaMoment);
-   connection.query('UPDATE orden_trabajo SET ? WHERE id_orden_trabajo = ?', [{estado: "En proceso",fecha_inicio_real:fechaMoment},id],(error,results)=>{
-      if(error){
+ 
+   // Actualizar orden de trabajo
+   connection.query(
+     'UPDATE orden_trabajo SET ? WHERE id_orden_trabajo = ?',
+     [{ estado: "En proceso", fecha_inicio_real: fechaMoment }, idOrden],
+     (error, results) => {
+       if (error) {
          console.log(error);
-      }else{
-         res.redirect('/orden-de-trabajo/pendiente');
-      }
-   })
-};
+         return res.status(500).send("Error al actualizar la orden.");
+       }
+ 
+       if (inhabilitarActivo) {
+         // Obtener el nombre del activo asociado
+         connection.query(
+           'SELECT activo FROM orden_trabajo WHERE id_orden_trabajo = ?',
+           [idOrden],
+           (err, result) => {
+             if (err) {
+               console.log(err);
+               return res.status(500).send("Error al obtener el activo.");
+             }
+ 
+             if (result.length === 0) return res.redirect('/orden-de-trabajo/pendiente');
+ 
+             const nombreActivo = result[0].activo;
+ 
+             // Actualizar el estado del activo en la tabla activos
+             connection.query(
+               'UPDATE activos SET estado = "Fuera de servicio" WHERE nombre = ?',
+               [nombreActivo],
+               (err2) => {
+                 if (err2) {
+                   console.log(err2);
+                   // Continua redirección aunque falle la actualización del activo
+                 }
+                 return res.redirect('/orden-de-trabajo/pendiente');
+               }
+             );
+           }
+         );
+       } else {
+         return res.redirect('/orden-de-trabajo/pendiente');
+       }
+     }
+   );
+ };
+ 
 
-const cambiarEstadoEnProcesoTerminada = (req, res) => {
+ const cambiarEstadoEnProcesoTerminada = (req, res) => {
    console.log("Datos recibidos:");
    console.log(req.body);
-
+ 
    const id = req.body.id;
    const tipo = req.body.tipo;
    const descripcionSolucion = req.body.descripcionSolucion;
    const lapsoHorasMilisegundos = req.body.horas * 3600000;
    const fechaInicioReal = req.body.inicioReal;
-   
-   // ESTO HAY QUE BORRAR UNA VEZ QUE IVAN TERMINA CON LAS PRUEBAS Y DESCOMENTAR LAS LINEAS 134 y 135 Y borrar la 136
+   const switchActivoDisponible = req.body.activoDisponible === 'on';
+ 
    const fechaFin = new Date(req.body.fechaFin);
-
-   
-   // Construir array de materiales procesando las propiedades del objeto `req.body`
-   let materiales = [];
-   Object.keys(req.body).forEach(key => {
-       const match = key.match(/materiales\[(\d+)\]\[(id|cantidad)\]/);
-       if (match) {
-           const index = match[1];
-           const field = match[2];
-
-           if (!materiales[index]) {
-               materiales[index] = { id: null, cantidad: 0 };
-           }
-
-           if (field === 'id') materiales[index].id = req.body[key];
-           if (field === 'cantidad') materiales[index].cantidad = parseInt(req.body[key], 10);
-       }
-   });
-
-   const materialesActualizables = materiales.filter(material => material.cantidad > 0);
-
-   // Actualizar stock para materiales utilizados
-   materialesActualizables.forEach(({ id, cantidad }) => {
-       console.log(`Actualizando stock - Material ID: ${id}, Cantidad: ${cantidad}`);
-       connection.query(
-           'UPDATE stock SET cantidad = cantidad - ? WHERE idstock = ?',
-           [cantidad, id],
-           (error, results) => {
-               if (error) {
-                   console.log(`Error al actualizar stock para el material ${id}:`, error);
-               } else {
-                   console.log(`Stock actualizado para el material ${id}`);
-               }
-           }
-       );
-   });
-
-   // const fechaFin = new Date();
-   // const fechaMomentFin = moment(fechaFin).format('YYYY-MM-DDTHH:mm');
    const fechaMomentFin = moment(fechaFin).format('YYYY-MM-DDTHH:mm');
-
+ 
    const year = fechaInicioReal.substring(0, 4);
    const month = fechaInicioReal.substring(5, 7) - 1;
    const day = fechaInicioReal.substring(8, 10);
@@ -143,57 +153,119 @@ const cambiarEstadoEnProcesoTerminada = (req, res) => {
    const minute = fechaInicioReal.substring(14, 16);
    const fechaInicioRealTipoDate = new Date(year, month, day, hour, minute);
    const duracionOT = (fechaFin.getTime() - fechaInicioRealTipoDate.getTime()) / 3600000;
-
-   if (tipo === "Correctiva") {
-       connection.query(
-           'UPDATE orden_trabajo SET ? WHERE id_orden_trabajo = ?',
-           [{ estado: "Finalizada", fecha_fin: fechaMomentFin, horas_totales: duracionOT }, id],
-           (error, results) => {
-               if (error) {
-                   console.error(error);
-                   return res.status(500).send("Error al actualizar la orden de trabajo.");
-               }
-               res.redirect('/orden-de-trabajo/en-proceso');
+ 
+   // Procesar materiales
+   let materiales = [];
+   Object.keys(req.body).forEach(key => {
+     const match = key.match(/materiales\[(\d+)\]\[(id|cantidad)\]/);
+     if (match) {
+       const index = match[1];
+       const field = match[2];
+       if (!materiales[index]) materiales[index] = { id: null, cantidad: 0 };
+       if (field === 'id') materiales[index].id = req.body[key];
+       if (field === 'cantidad') materiales[index].cantidad = parseInt(req.body[key], 10);
+     }
+   });
+ 
+   const materialesActualizables = materiales.filter(material => material.cantidad > 0);
+   materialesActualizables.forEach(({ id, cantidad }) => {
+     connection.query(
+       'UPDATE stock SET cantidad = cantidad - ? WHERE idstock = ?',
+       [cantidad, id],
+       (error) => {
+         if (error) {
+           console.log(`Error al actualizar stock para el material ${id}:`, error);
+         }
+       }
+     );
+   });
+ 
+   // Función auxiliar para cambiar el activo a "Disponible" si corresponde
+   function actualizarActivoSiCorresponde(callback) {
+     if (!switchActivoDisponible) return callback(); // Si no está marcado, continuar
+ 
+     // Obtener nombre del activo
+     connection.query(
+       'SELECT activo FROM orden_trabajo WHERE id_orden_trabajo = ?',
+       [id],
+       (error, result) => {
+         if (error || result.length === 0) {
+           console.log("Error al obtener el activo para actualizar:", error);
+           return callback(); // Continuar sin romper si hay error
+         }
+ 
+         const nombreActivo = result[0].activo;
+         connection.query(
+           'UPDATE activos SET estado = "Disponible" WHERE nombre = ?',
+           [nombreActivo],
+           (err2) => {
+             if (err2) {
+               console.log("Error al actualizar el estado del activo:", err2);
+             } else {
+               console.log(`Activo "${nombreActivo}" actualizado a Disponible.`);
+             }
+             return callback(); // Continuar luego del update
            }
-       );
-   } else {
-       const nuevaFechaInicio = new Date(fechaFin.getTime() + lapsoHorasMilisegundos);
-       const fechaMomentInicio = moment(nuevaFechaInicio).format("YYYY-MM-DDTHH:mm");
-
-       // Registrar la orden finalizada en ot_programada_finalizada
-       connection.query(
-           'INSERT INTO ot_programada_finalizada SET ?',
-           {
-               id_orden_programada: id,
-               fecha_inicio: fechaInicioReal,
-               fecha_inicio_real: fechaInicioReal,
-               fecha_fin: fechaMomentFin,
-               observacion: descripcionSolucion,
-               horas_totales: duracionOT
-           },
-           (error, results) => {
-               if (error) {
-                   console.error(error);
-                   return res.status(500).send("Error al insertar en la tabla ot_programada_finalizada.");
-               }
-
-               // Actualizar la misma orden de trabajo a estado "Pendiente" con nueva fecha de inicio
-               connection.query(
-                   'UPDATE orden_trabajo SET ? WHERE id_orden_trabajo = ?',
-                   [{ estado: "Pendiente", fecha_inicio: fechaMomentInicio }, id],
-                   (error, results) => {
-                       if (error) {
-                           console.error("Error al actualizar la orden programada:", error);
-                           return res.status(500).send("Error al actualizar la orden programada.");
-                       }
-                       console.log("Orden programada actualizada correctamente.");
-                       res.redirect('/orden-de-trabajo/en-proceso');
-                   }
-               );
-           }
-       );
+         );
+       }
+     );
    }
-};
+ 
+   if (tipo === "Correctiva") {
+     connection.query(
+       'UPDATE orden_trabajo SET ? WHERE id_orden_trabajo = ?',
+       [{ estado: "Finalizada", fecha_fin: fechaMomentFin, horas_totales: duracionOT }, id],
+       (error) => {
+         if (error) {
+           console.error(error);
+           return res.status(500).send("Error al actualizar la orden de trabajo.");
+         }
+ 
+         actualizarActivoSiCorresponde(() => {
+           res.redirect('/orden-de-trabajo/en-proceso');
+         });
+       }
+     );
+   } else {
+     const nuevaFechaInicio = new Date(fechaFin.getTime() + lapsoHorasMilisegundos);
+     const fechaMomentInicio = moment(nuevaFechaInicio).format("YYYY-MM-DDTHH:mm");
+ 
+     connection.query(
+       'INSERT INTO ot_programada_finalizada SET ?',
+       {
+         id_orden_programada: id,
+         fecha_inicio: fechaInicioReal,
+         fecha_inicio_real: fechaInicioReal,
+         fecha_fin: fechaMomentFin,
+         observacion: descripcionSolucion,
+         horas_totales: duracionOT
+       },
+       (error) => {
+         if (error) {
+           console.error(error);
+           return res.status(500).send("Error al insertar en ot_programada_finalizada.");
+         }
+ 
+         connection.query(
+           'UPDATE orden_trabajo SET ? WHERE id_orden_trabajo = ?',
+           [{ estado: "Pendiente", fecha_inicio: fechaMomentInicio }, id],
+           (error) => {
+             if (error) {
+               console.error("Error al actualizar la orden programada:", error);
+               return res.status(500).send("Error al actualizar la orden programada.");
+             }
+ 
+             actualizarActivoSiCorresponde(() => {
+               console.log("Orden programada finalizada y activo actualizado si correspondía.");
+               res.redirect('/orden-de-trabajo/en-proceso');
+             });
+           }
+         );
+       }
+     );
+   }
+ };
+ 
 
 const eliminarOrden = (req, res)=>{
    const id = req.body.id;

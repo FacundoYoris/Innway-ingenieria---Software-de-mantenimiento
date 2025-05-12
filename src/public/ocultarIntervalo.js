@@ -1,14 +1,33 @@
-$(document).ready(function() {
-  $('select').on('change', function() { //Change detecta cuando se hace un cambio en el input del formulario que tiene id=select
-    var selectedValue = $(this).val();
-    $('#intervaloPeriodica, #lapsoPeriodica, #intPeriodica, #lapPeriodica').toggle(selectedValue === "Programada");
+$(function () {
+  const $tipoTarea = $('#crearOrden #select');
+  const $intPeriodica = $('#crearOrden #intPeriodica');
+  const $intervaloPeriodica = $('#crearOrden #intervaloPeriodica');
+  const $lapsoPeriodica = $('#crearOrden #lapsoPeriodica');
+  const $unidadperiodica = $('#crearOrden #unidadperiodica');
+
+  function actualizarVisibilidadCamposPeriodicos() {
+    const esProgramada = $tipoTarea.val() === 'Programada';
+    $intPeriodica.toggle(esProgramada);
+    $intervaloPeriodica.toggle(esProgramada);
+    $lapsoPeriodica.toggle(esProgramada);
+    $unidadperiodica.toggle(esProgramada);
+  }
+
+  // Cambio en el select "Tipo de tarea"
+  $tipoTarea.on('change', actualizarVisibilidadCamposPeriodicos);
+
+  // Cada vez que se abre el modal
+  $('#crearOrden').on('shown.bs.modal', function () {
+    actualizarVisibilidadCamposPeriodicos();
+    actualizarCamposProduccion(); // También actualiza los campos por si el checkbox ya está marcado
   });
 
-  const $produccion = $('#produccion');
-  const $grupoElemento = $('#grupoElemento');
-  const $grupoDescripcion = $('#grupoDescripcion');
+  // Manejo del checkbox "Tarea de producción"
+  const $produccion = $('#crearOrden #produccion');
+  const $grupoElemento = $('#crearOrden #grupoElemento');
+  const $grupoDescripcion = $('#crearOrden #grupoDescripcion');
 
-  function toggleCamposProduccion() {
+  function actualizarCamposProduccion() {
     if ($produccion.is(':checked')) {
       $grupoElemento.hide();
       $grupoDescripcion.hide();
@@ -18,12 +37,5 @@ $(document).ready(function() {
     }
   }
 
-  // Ejecutar cuando se marca/desmarca
-  $produccion.on('change', toggleCamposProduccion);
-
-  // Ejecutar al cargar (por si viene ya marcado)
-  toggleCamposProduccion();
-
+  $produccion.on('change', actualizarCamposProduccion);
 });
-
-

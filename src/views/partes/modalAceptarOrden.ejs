@@ -1,22 +1,29 @@
 <!-- Cartel de confirmar aceptarción de la orden -->
 <div class="modal fade" id="aceptarOrden<%=id%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Aceptar orden de trabajo</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          ¿Estás seguro que deseas aceptar la orden de trabajo?
-        </div>
-        <div class="modal-footer">
-          <form action="/cambiar-estado-pendiente-enProceso" method="post">
-            <input id="id" name="id" value="<%=id%>" hidden>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary" tabindex="5">Aceptar orden</button>
-          </form>
-          
-        </div>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Aceptar orden de trabajo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro que deseas aceptar la orden de trabajo?
+      </div>
+      <div class="modal-footer">
+        <form action="/cambiar-estado-pendiente-enProceso" method="post">
+          <!-- Toggle de inhabilitación del activo -->
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="inhabilitarActivo<%=id%>" name="inhabilitarActivo">
+            <label class="form-check-label" for="inhabilitarActivo<%=id%>">¿Inhabilitar activo asociado?</label>
+          </div>
+
+          <input id="id" name="id" value="<%=id%>" hidden>
+
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" tabindex="5">Aceptar orden</button>
+        </form>
+
       </div>
     </div>
   </div>
+</div>
